@@ -86,11 +86,9 @@ def depthFirstSearch(problem):
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
-    "*** YOUR CODE HERE ***"
-    
     # Create open stack, list to track all visited states and start state
     Open = util.Stack()
-    all_visited = []
+    visited = []
     start = (problem.getStartState(),None,[])
     
     # Place start node in the open set
@@ -99,25 +97,20 @@ def depthFirstSearch(problem):
     while not Open.isEmpty():
         
         n = Open.pop()
-        
         Loc = n[0]
-        Dir = n[1]
         Path = n[2]
         
-        if problem.isGoalState(Loc) and Loc not in all_visited:
+        if problem.isGoalState(Loc) and Loc not in visited:
             return Path
         
         for succ in problem.getSuccessors(Loc):
-            if succ[0] not in all_visited:
-                all_visited.append(Loc)
-                #print (show(Open))
+            if succ[0] not in visited:
+                visited.append(Loc)
                 Open.push((succ[0],succ[1], Path + [succ[1]]))
     return []
 
-    util.raiseNotDefined()
-
-def show (Stack):
-    
+#helper function to show everything in stack
+def show(Stack):
     a = []
     while not Stack.isEmpty():
         a.append(Stack.pop())
@@ -143,7 +136,6 @@ def breadthFirstSearch(problem):
         n = Open.pop()
         
         Loc = n[0]
-        Dir = n[1]
         Path = n[2]
         
         #This save state has everything you need
@@ -153,15 +145,35 @@ def breadthFirstSearch(problem):
         for succ in problem.getSuccessors(Loc):
             if succ[0] not in all_visited:
                 all_visited[Loc] = problem.getCostOfActions(Path)
-                #print (show(Open))
                 Open.push((succ[0],succ[1], Path + [succ[1]]),1)
-    return []    
-    util.raiseNotDefined()
+    return []
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    
+    fin = []
+    Open = util.PriorityQueue()
+    Open.push([[(problem.getStartState(), None, 0)], 0], 0)
+
+    while not Open.isEmpty():
+        n = Open.pop()
+        Loc = n[0]
+        cost = n[1]
+        end = Loc[-1][0]
+
+        if problem.isGoalState(end):
+            directions = []
+            for state in Loc:
+                directions.append(state[1])
+            directions.remove(directions[0])
+            return directions
+
+        if not end in fin:
+            for succ in problem.getSuccessors(end):
+                nCost = cost + succ[2]
+                Open.push([Loc + [succ], nCost], nCost)
+                
+            fin.append(end)
 
 def nullHeuristic(state, problem=None):
     """
@@ -172,8 +184,31 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    fin = []
+    Open = util.PriorityQueue()
+    Open.push([[(problem.getStartState(), None, 0)], 0],
+                heuristic(problem.getStartState(), problem))
+
+    while not Open.isEmpty():
+        n = Open.pop()
+        Loc = n[0]
+        end = Loc[-1][0]
+        path = n[1]   
+
+        if problem.isGoalState(end):
+            directions = []
+            for state in Loc:
+                directions.append(state[1])
+            directions.remove(directions[0])
+            return directions
+
+        if not end in fin:
+            for succ in problem.getSuccessors(end):
+                nPatch = Loc + [succ]
+                nCost = path + succ[2]
+                Open.push([nPatch, nCost], nCost + heuristic(succ[0], problem))
+                
+            fin.append(end)
 
 
 # Abbreviations
