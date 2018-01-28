@@ -53,26 +53,33 @@ class GoWestAgent(Agent):
             return Directions.STOP
         
 class Corner():
-        def __init__(self, startState, corners):
+        def __init__(self, start, corners):
+            self.state = start
             self.corners = corners
-            self.state = startState
-            self.touchedCorners = [False, False, False, False]
             self.touch(self.state)
-            
+            self.touchedCorners = [False, False, False, False]
+
         def isGoal(self):
-            return not False in self.touchedCorners
+            if False in self.touchedCorners:
+                return False
+            return True
 
         def Position(self):
             return self.state
 
         def touch(self, state):
-            for i in range(4):
+            i = 0
+            while i < 4:
                 if self.corners[i] == state:
                     self.touchedCorners[i] = True
+                i = i + 1
             self.state = state
 
         def __eq__(self, other):
-            return self.touchedCorners == other.touchedCorners and self.Position() == other.Position()
+            if self.touchedCorners == other.touchedCorners:
+                if self.Position() == other.Position():
+                    return True
+            return False
 
 
 #######################################################
@@ -349,14 +356,13 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
-            x,y = state.Position()
+            x, y = state.Position()
             dx, dy = Actions.directionToVector(action)
             nx, ny = int(x + dx), int(y + dy)
             hits = self.walls[nx][ny]
             if not(hits):
-                nextState = (nx, ny)
                 copied = copy.deepcopy(state)
-                copied.touch(nextState)
+                copied.touch((nx, ny))
                 successors.append((copied, action, 1))
                 
         self._expanded += 1 # DO NOT CHANGE
@@ -375,7 +381,6 @@ class CornersProblem(search.SearchProblem):
             if self.walls[x][y]: return 999999
         return len(actions)
 
-
 def cornersHeuristic(state, problem):
     """
     A heuristic for the CornersProblem that you defined.
@@ -391,27 +396,22 @@ def cornersHeuristic(state, problem):
     """
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
-
     "*** YOUR CODE HERE ***"
+    i = 0
+    Max = 0
+    Open = []
     if not(state.isGoal()):
-        
-        Open = []
-        i = 0
         while i < 4:
             if not(state.touchedCorners[i]):
                 Open.append(corners[i])
             i = i + 1
-                
-        Max = 0
-        
         for c in Open:
-            distance = util.manhattanDistance(state.Position(), c)
-            
+            sx, sy = state.Position()
+            ex, ey = c
+            distance = abs(ex - sx) + abs(ey - sy)
             if distance > Max:
-                Max = distance
-                
+                Max = distance            
         return Max
-    
     return 0
 
 class AStarCornersAgent(SearchAgent):
