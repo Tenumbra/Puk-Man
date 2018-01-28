@@ -150,30 +150,35 @@ def breadthFirstSearch(problem):
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    
-    fin = []
+    # Create open stack, list to track all visited states and start state
+    att = []
     Open = util.PriorityQueue()
+    
+    # Place start node in the open set
     Open.push([[(problem.getStartState(), None, 0)], 0], 0)
 
     while not Open.isEmpty():
+        
         n = Open.pop()
+        
         Loc = n[0]
-        cost = n[1]
+        path = n[1]
         end = Loc[-1][0]
-
+        
+        #This save state has everything you need
         if problem.isGoalState(end):
-            directions = []
+            expand = []
             for state in Loc:
-                directions.append(state[1])
-            directions.remove(directions[0])
-            return directions
+                expand.append(state[1])
+            expand.pop(0)
+            return expand
 
-        if not end in fin:
+        if not(end in att):
             for succ in problem.getSuccessors(end):
-                nCost = cost + succ[2]
-                Open.push([Loc + [succ], nCost], nCost)
+                cost = path + succ[2]
+                Open.push([Loc + [succ], cost], cost)
                 
-            fin.append(end)
+            att.append(end)
 
 def nullHeuristic(state, problem=None):
     """
@@ -184,31 +189,37 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    fin = []
+    # Create open stack, list to track all visited states and start state
+    att = []
     Open = util.PriorityQueue()
+    
+    # Place start node in the open set
     Open.push([[(problem.getStartState(), None, 0)], 0],
                 heuristic(problem.getStartState(), problem))
 
     while not Open.isEmpty():
+        
         n = Open.pop()
+        
         Loc = n[0]
+        path = n[1]  
         end = Loc[-1][0]
-        path = n[1]   
 
+        #This save state has everything you need
         if problem.isGoalState(end):
-            directions = []
+            expand = []
             for state in Loc:
-                directions.append(state[1])
-            directions.remove(directions[0])
-            return directions
+                expand.append(state[1])
+            expand.pop(0)
+            return expand
 
-        if not end in fin:
+        if not(end in att):
             for succ in problem.getSuccessors(end):
-                nPatch = Loc + [succ]
-                nCost = path + succ[2]
-                Open.push([nPatch, nCost], nCost + heuristic(succ[0], problem))
+                nPath = Loc + [succ]
+                cost = path + succ[2]
+                Open.push([nPath, cost], cost + heuristic(succ[0], problem))
                 
-            fin.append(end)
+            att.append(end)
 
 
 # Abbreviations
