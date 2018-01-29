@@ -86,9 +86,11 @@ def depthFirstSearch(problem):
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
+    "*** YOUR CODE HERE ***"
+    
     # Create open stack, list to track all visited states and start state
     Open = util.Stack()
-    visited = []
+    all_visited = []
     start = (problem.getStartState(),None,[])
     
     # Place start node in the open set
@@ -97,20 +99,29 @@ def depthFirstSearch(problem):
     while not Open.isEmpty():
         
         n = Open.pop()
-        Loc = n[0]
-        Path = n[2]
         
-        if problem.isGoalState(Loc) and Loc not in visited:
+        Loc = n[0]
+        Dir = n[1]
+        Path = n[2]
+        #print(all_visited)
+        #print(show(Open))     
+        
+        if problem.isGoalState(Loc) and Loc not in all_visited:
             return Path
         
         for succ in problem.getSuccessors(Loc):
-            if succ[0] not in visited:
-                visited.append(Loc)
+            if succ[0] not in all_visited:
+                all_visited.append(Loc)
+                #print (show(Open))
                 Open.push((succ[0],succ[1], Path + [succ[1]]))
+                
+    
     return []
 
-#helper function to show everything in stack
-def show(Stack):
+    util.raiseNotDefined()
+
+def show (Stack):
+    
     a = []
     while not Stack.isEmpty():
         a.append(Stack.pop())
@@ -118,35 +129,56 @@ def show(Stack):
     
     return a
 
+
+# Creates a list with all the directions in the path given
+def getPath(Open):
+    path = []
+    for state in Open: 
+        # Don't include None in the path list
+        if (state[1] != None):
+            path.append(state[1])
+    return path    
+
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
     
-    # Create open stack, list to track all visited states and start state
-    Open = util.PriorityQueue()
     
-    all_visited = {}
-    start = (problem.getStartState(),None,[])
-       
+    # Create open stack, list to track all visited states and start state
+    Open = util.Queue()
+    
+    
+    start = (problem.getStartState(),None,0)
+    
+    # All visited keeps track of the visited nodes 
+    all_visited = []
+    
+    
     # Place start node in the open set
-    Open.push(start,1)
-       
+    Open.push([start])
+    
     while not Open.isEmpty():
         
         n = Open.pop()
+        #print("n",n)
+
+        end = n[-1][0]
+
+        if (problem.isGoalState(end)):
+            # Get path adds the directions of the path to the goal state
+            return getPath(n)
         
-        Loc = n[0]
-        Path = n[2]
-        
-        #This save state has everything you need
-        if problem.isGoalState(Loc) and Loc not in all_visited:
-            return Path
-        
-        for succ in problem.getSuccessors(Loc):
-            if succ[0] not in all_visited:
-                all_visited[Loc] = problem.getCostOfActions(Path)
-                Open.push((succ[0],succ[1], Path + [succ[1]]),1)
-    return []
+       
+        if end not in all_visited:
+            for succ in problem.getSuccessors(end):
+                full_path = n + [succ]
+                Open.push(full_path)
+
+            all_visited.append(end)
+            
+    return []    
+    
+    util.raiseNotDefined()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
