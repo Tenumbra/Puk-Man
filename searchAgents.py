@@ -41,7 +41,6 @@ import util
 import time
 import search
 import copy
-
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
 
@@ -51,36 +50,6 @@ class GoWestAgent(Agent):
             return Directions.WEST
         else:
             return Directions.STOP
-        
-class Corner():
-        def __init__(self, start, corners):
-            self.state = start
-            self.corners = corners
-            self.touch(self.state)
-            self.touchedCorners = [False, False, False, False]
-
-        def isGoal(self):
-            if False in self.touchedCorners:
-                return False
-            return True
-
-        def Position(self):
-            return self.state
-
-        def touch(self, state):
-            i = 0
-            while i < 4:
-                if self.corners[i] == state:
-                    self.touchedCorners[i] = True
-                i = i + 1
-            self.state = state
-
-        def __eq__(self, other):
-            if self.touchedCorners == other.touchedCorners:
-                if self.Position() == other.Position():
-                    return True
-            return False
-
 
 #######################################################
 # This portion is written for you, but will only work #
@@ -297,6 +266,36 @@ def euclideanHeuristic(position, problem, info={}):
 # This portion is incomplete.  Time to write code!  #
 #####################################################
 
+class Corner():
+    def __init__(self, start, corners):
+        self.state = start
+        self.corners = corners
+        self.touch(self.state)
+        self.touchedCorners = [False, False, False, False]
+
+    def isGoal(self):
+        if False in self.touchedCorners:
+            return False
+        return True
+
+    def Position(self):
+        return self.state
+
+    def touch(self, state):
+        i = 0
+        while i < 4:
+            if self.corners[i] == state:
+                self.touchedCorners[i] = True
+            i = i + 1
+        self.state = state
+
+    def __eq__(self, other):
+        if self.touchedCorners == other.touchedCorners:
+            if self.Position() == other.Position():
+                return True
+        return False
+        
+        
 class CornersProblem(search.SearchProblem):
     """
     This search problem finds paths through all four corners of a layout.
@@ -309,8 +308,11 @@ class CornersProblem(search.SearchProblem):
         Stores the walls, pacman's starting position and corners.
         """
         self.walls = startingGameState.getWalls()
+        print(self.walls)
         self.startingPosition = startingGameState.getPacmanPosition()
+        print(self.startingPosition)
         top, right = self.walls.height-2, self.walls.width-2
+        print(top,right)
         self.corners = ((1,1), (1,top), (right, 1), (right, top))
         for corner in self.corners:
             if not startingGameState.hasFood(*corner):
@@ -321,24 +323,40 @@ class CornersProblem(search.SearchProblem):
         "*** YOUR CODE HERE ***"
 
     def getStartState(self):
-        """
-        Returns the start state (in your state space, not the full Pacman state
-        space)
-        """
-        "*** YOUR CODE HERE ***"
-        return Corner(self.startingPosition, self.corners)
-
+            """
+            Returns the start state (in your state space, not the full Pacman state
+            space)
+            """
+            "*** YOUR CODE HERE ***"
+            return Corner(self.startingPosition, self.corners)
+    
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        return state.isGoal()
+        return state.isGoal()        
+    #def getStartState(self):
+        #"""
+        #Returns the start state (in your state space, not the full Pacman state
+        #space)
+        #"""
+        #"*** YOUR CODE HERE ***"
+        #return self.startingPosition, [0,0,0,0]
+        ##util.raiseNotDefined()
 
+    #def isGoalState(self, state):
+        #"""
+        #Returns whether this search state is a goal state of the problem.
+        #"""
+        #"*** YOUR CODE HERE ***"
+        #return state[1] == [1,1,1,1]
+        ##util.raiseNotDefined()
+        
+    
     def getSuccessors(self, state):
         """
         Returns successor states, the actions they require, and a cost of 1.
-
          As noted in search.py:
             For a given state, this should return a list of triples, (successor,
             action, stepCost), where 'successor' is a successor to the current
@@ -381,15 +399,13 @@ class CornersProblem(search.SearchProblem):
             if self.walls[x][y]: return 999999
         return len(actions)
 
+
 def cornersHeuristic(state, problem):
     """
     A heuristic for the CornersProblem that you defined.
-
       state:   The current search state
                (a data structure you chose in your search problem)
-
       problem: The CornersProblem instance for this layout.
-
     This function should always return a number that is a lower bound on the
     shortest path from the state to a goal of the problem; i.e., it should be
     admissible.
@@ -400,6 +416,7 @@ def cornersHeuristic(state, problem):
     i = 0
     Max = 0
     Open = []
+    #print "state",state
     if not(state.isGoal()):
         while i < 4:
             if not(state.touchedCorners[i]):
@@ -503,19 +520,9 @@ def foodHeuristic(state, problem):
 
     """
     position, foodGrid = state
+    print "position",position,"foodgrid\n",foodGrid.asList()
     "*** YOUR CODE HERE ***"
-    
-    if (foodGrid.asList()):
-        m = 0
-        
-        for xy in foodGrid.asList():
-            distance = mazeDistance(xy, position, problem.startingGameState)
-            if distance > m:
-                m = distance
-                
-        return m
-    else:
-        return 0
+    return 0
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
